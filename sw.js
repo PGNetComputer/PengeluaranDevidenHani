@@ -3,7 +3,7 @@
  *  - menerima notifikasi Firebase (kalau sudah diisi di config.js)
  * Tidak menyentuh panggilan ke Apps Script — data selalu langsung dari server.
  */
-var CACHE = 'pengeluaran-v1';
+var CACHE = 'pengeluaran-v3';
 var ASET = ['./', 'index.html', 'config.js', 'manifest.json', 'ikon-192.png', 'ikon-512.png'];
 
 try { importScripts('config.js'); } catch (e) {}

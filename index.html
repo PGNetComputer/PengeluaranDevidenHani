@@ -359,7 +359,7 @@ function muatData(diam) {
 }
 
 /* ---------- antrean simpan ---------- */
-var MENGIRIM = false, jamKirim = null;
+var MENGIRIM = false, jamKirim = null, GALAT_KIRIM = '';
 
 function jadwalKirim(ms) { clearTimeout(jamKirim); jamKirim = setTimeout(kirimAntrean, ms == null ? 2500 : ms); }
 
@@ -374,10 +374,14 @@ function kirimAntrean() {
     if (err) {
       simpanLokal(K_ANTRE, ANTRE);
       if (err.kodeSalah) { mintaKode('Kode akses sudah diganti. Catatan yang belum terkirim tetap disimpan di HP ini.'); return; }
+      var jaringan = /menghubungi server|tidak menjawab/i.test(err.message);
+      if (!jaringan && GALAT_KIRIM !== err.message) toast('Gagal menyimpan: ' + err.message);
+      GALAT_KIRIM = jaringan ? 'sinyal/jaringan, dicoba lagi otomatis' : err.message;
       setStatus('');
       jadwalKirim(15000);                 // coba lagi nanti
       return;
     }
+    GALAT_KIRIM = '';
     ANTRE.shift();
     b.rows.forEach(function (x) { DATA.r.push([x.t, x.j, x.s, x.k, x.ket, x.n, x.id]); });
     simpanLokal(K_ANTRE, ANTRE); simpanLokal(K_DATA, DATA);
@@ -387,7 +391,8 @@ function kirimAntrean() {
 
 function setStatus(h) {
   var n = 0; ANTRE.forEach(function (b) { n += b.rows.length; });
-  $('status').innerHTML = (h || '') + (n ? (h ? '<br>' : '') + '<b>' + n + ' belum terkirim</b>' : '');
+  $('status').innerHTML = (h || '') + (n ? (h ? '<br>' : '') + '<b>' + n + ' belum terkirim</b>' +
+    (GALAT_KIRIM ? '<br><span style="color:#c0392b;max-width:170px;display:inline-block">' + esc(GALAT_KIRIM) + '</span>' : '') : '');
 }
 
 /** Tambah baris ke antrean -> tampil seketika, dikirim di latar. */
